@@ -1,0 +1,211 @@
+
+
+.rugaform__container {
+}
+
+/** This class is added to inputs whose value has changed */
+.rugaform__container .ruga__changed {
+    border: 1px dashed DarkOrange;
+}
+
+/** This class is set on the currently active input */
+.rugaform__container .ruga__active {
+    transition: ease-out 0.5s;
+    background-color: #DDF8FF !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Form styling */
+
+.rugaform__container .form-condensed label {
+    font-weight: 400 !important;
+    font-size: 80%;
+
+    margin-bottom: 0;
+    padding-top: 2px;
+    display: inline-block;
+    vertical-align: text-bottom;
+}
+
+.rugaform__container .form-condensed [class^="col-"]:not(:last-child) {
+    padding-right: 5px;
+}
+
+.rugaform__container .form-condensed [class^="col-"]:not(:first-child) {
+    padding-left: 5px;
+}
+
+.rugaform__container .form-condensed .form-control:not([multiple]) {
+    height: 26px;
+}
+
+.rugaform__container .form-condensed .form-control {
+    padding: 0px 4px;
+    font-size: 90%;
+}
+
+.rugaform__container .form-condensed textarea.form-control {
+    padding: 0px 4px;
+    height: inherit;
+}
+
+.rugaform__container .form-condensed .form-group {
+    margin-bottom: 4px;
+}
+
+.rugaform__container .form-condensed .btn-sm {
+    font-size: .8rem;
+    line-height: 1.2;
+}
+
+.rugaform__container .form-condensed .input-group button {
+    font-size: .8rem;
+    line-height: 1.2;
+}
+
+
+
+.rugaform__container .form-condensed .input-group-append {
+    height: 26px;
+}
+.rugaform__container .form-condensed .input-group-text {
+    font-size: 90%;
+}
+
+
+
+.rugaform__container .form-condensed fieldset {
+    border: 1px solid #DDDDDD;
+    padding: 0px 6px 2px 6px;
+}
+
+.rugaform__container .form-condensed legend {
+    font-size: 100%;
+    width: auto;
+    margin-left: 6px;
+    padding: 0px 2px;
+    /*padding-top: 10px;*/
+    /*margin-bottom: 10px;*/
+}
+
+
+
+
+/* Select 2 with default theme */
+.rugaform__container .form-condensed .select2-container--default .select2-selection--single,
+.rugaform__container .form-condensed .select2-selection .select2-selection--single {
+    padding: 3px 4px;
+    height: 26px;
+    font-size: 90%;
+}
+.rugaform__container .form-condensed .select2-container--default .select2-selection--single .select2-selection__rendered,
+.rugaform__container .form-condensed .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 26px;
+    line-height: 26px;
+    top: -2px;
+}
+.rugaform__container .form-condensed .select2-container--default .select2-dropdown {
+    font-size: 90%;
+}
+
+
+.rugaform__container .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: #e9ecef;
+    color: inherit;
+}
+.rugaform__container .select2-container .select2-selection--single .select2-selection__rendered {
+    padding-left: 4px;
+}
+.select2-results__option {
+    padding: 4px !important;
+}
+
+
+
+/* Select 2 with bootstrap4 theme */
+.rugaform__container .form-condensed .select2-container--bootstrap4 .select2-selection--single,
+.rugaform__container .form-condensed .select2-selection .select2-selection--single {
+    /*padding: 3px 4px;*/
+    height: 26px !important;
+    font-size: 90%;
+}
+.rugaform__container .form-condensed .select2-container--bootstrap4 .select2-selection--single .select2-selection__rendered,
+.rugaform__container .form-condensed .select2-container--bootstrap4 .select2-selection--single .select2-selection__arrow {
+    height: 26px;
+    line-height: 26px;
+    top: -2px;
+}
+.rugaform__container .form-condensed .select2-container--bootstrap4 .select2-dropdown {
+    font-size: 90%;
+}
+.rugaform__container .form-condensed .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+    line-height: 26px;
+}
+.rugaform__container .select2-container--bootstrap4 .select2-selection--single .select2-selection__placeholder {
+    line-height: 26px;
+    color: rgb(170, 170, 170);
+}
+.rugaform__container .select2-container--bootstrap4.select2-container--disabled .select2-selection--single {
+    background-color: #e9ecef;
+    color: inherit;
+}
+
+
+/* input type=date */
+.rugaform__container input[type=date][value=""]:not(.ruga__changed):not(:focus) {
+    color: rgb(170, 170, 170);
+}
+
+
+
+
+
+
+
+
+
+
+
+strong[data-rugapencil-href] {
+    display: block;
+}
+
+[data-rugapencil-href] {
+    position: relative;
+    /*display: inline-block;*/
+}
+
+[data-rugapencil-href]:hover .rugapencil {
+    display: block;
+}
+
+[data-rugapencil-href] .rugapencil {
+    /*padding-top: 7px;*/
+    /*padding-right: 7px;*/
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: none;
+}
+
+[data-rugapencil-href] .rugapencil a {
+    color: #CCCCCC;
+}
+
+[data-rugapencil-href] .rugapencil a:hover {
+    color: #888888;
+}
+
+

@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Ruga\Skeleton;
-
+namespace Ruga\Rugaform;
 
 /**
  * ConfigProvider.
  *
- * @see    https://docs.mezzio.dev/mezzio/v3/features/container/config/
+ * @author Roland Rusch, easy-smart solution GmbH <roland.rusch@easy-smart.ch>
  */
 class ConfigProvider
 {
     public function __invoke()
     {
         return [
-            'dependencies' => [
-                'services' => [],
-                'aliases' => [],
-                'factories' => [],
-                'invokables' => [],
-                'delegators' => [],
+            'ruga' => [
+                'asset' => [
+                    'rugalib/ruga-rugaform' => [
+                        'scripts' => ['jquery.rugaform.js'],
+                        'stylesheets' => ['jquery.rugaform.css'],
+                    ],
+                ],
             ],
         ];
     }
