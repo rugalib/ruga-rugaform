@@ -141,8 +141,6 @@ HTML;
     const customSqlData=''+{$customSqlData};
     
     $(function() {
-        
-        
         const rugaform_{$this->getId()} = $('#{$this->getId()}').rugaform({
                 debug: {$this->getConfigAsJsBoolean('debug', false)},
                 requestedit: {$this->getConfigAsJsBoolean('requestedit', true)},
@@ -155,82 +153,6 @@ HTML;
                     ignore: ":hidden, [type=date]"
                 }
             });
-
-        
-        
-        
-        
-        var form_{$this->getId()}=$("#{$this->getId()}")
-            .on('preXhr.dt', function (e, settings, data) {
-                // Disable debug button
-                $('button[data-bs-target="#{$this->getId('debug-modal')}"]').removeClass(['text-danger', 'text-success']);
-                $('button[data-bs-target="#{$this->getId('debug-modal')}"]').prop('disabled', true);
-                
-                data.customSqlData=customSqlData;
-
-                if( filterFormSelector !== '' ) {
-                    // Convert form data to Object
-                    // https://stackoverflow.com/questions/41431322/how-to-convert-formdatahtml5-object-to-json
-                    const formData = Array.from(new FormData($(filterFormSelector)[0]));
-                    const obj = formData.reduce((o, [k, v]) => {
-                        let a = v, b, i, m = k.split('['), n = m[0], l = m.length;
-                        if (l > 1) {
-                            a = b = o[n] || [];
-                            for (i = 1; i < l; i++) {
-                                m[i] = (m[i].split(']')[0] || b.length) * 1;
-                                b = b[m[i]] = ((i + 1) == l) ? v : b[m[i]] || [];
-                            }
-                        }
-                        return { ...o, [n]: a };
-                        }, {});
-                    
-                    // Disable filter form
-                    $(':input', filterFormSelector).prop('disabled', true);
-    
-                    data.filter=obj;
-    
-                    if(data.draw === 1) {
-                        data.filter=initialFilter;
-                    }
-                }
-            })
-            .on('xhr.dt', function(e, settings, data, xhr) {
-                if((typeof data !== "object") || (data === null)) {
-                    data={
-                        query: '',
-                        error: xhr.status + ' ' + xhr.statusText,
-                        errorBody: xhr.responseText
-                    };
-                }
-                
-                // Store debug information to the modal
-                $('#{$this->getId('debug')}').html(
-                    (data.error ? ('<div class="alert alert-danger" role="alert">' + data.error + '</div>') : '')
-                    +
-                    (data.errorBody ? ('<pre class="small text-wrap"><code>' + data.errorBody + '</code></pre>') : '')
-                    +
-                    (data.query ? ('<pre class="small text-wrap"><code>' + data.query + '</code></pre>') : '')
-                    );
-                // Enable debug button
-                $('button[data-bs-target="#{$this->getId('debug-modal')}"]').prop('disabled', false);
-                
-                if(data.error) {
-                    $('button[data-bs-target="#{$this->getId('debug-modal')}"]').addClass('text-danger');
-                } else if(data.query) {
-                    $('button[data-bs-target="#{$this->getId('debug-modal')}"]').addClass('text-success');
-                }
-                
-                if( filterFormSelector !== '' ) {
-                    // Enable filter form
-                    $(':input', filterFormSelector).prop('disabled', false);
-                    $(filterFormSelector).trigger('reset');
-                    
-                    // Populate form from filter object
-                    populate($(filterFormSelector)[0], data.filter);
-                }
-            })
-            
-
     });
 }(window.jQuery, window, document));
 JS;
