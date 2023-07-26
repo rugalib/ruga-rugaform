@@ -17,33 +17,55 @@
     const defaults = {
         url: '',
 
-        submitdisabled: false,                  // Also submit disabled inputs
-        trackchanges: true,                     // Marks changed inputs with css class selector.changed.
-        instasave: false,                       // Send changes immediately to the backend without waiting for the user to click "save".
-        requestedit: false,                     // Form is initially disabled. The user has to enable edit mode to make changes.
-        alwayseditable: false,                  // The form contains inputs that are always editable. (TODO: why?)
-        suppressreload: false,                  // Suppress all reloads. (TODO: do we still need this?)
-        setfocusto: ":input:visible:first",     // Set focus to this field if edit mode starts (default: first visible)
-        debug: false,                           // Send debug output to console
+        /** Also submit disabled inputs. */
+        submitdisabled: false,
+        /** Marks changed inputs with css class selector.changed. */
+        trackchanges: true,
+        /** Send changes immediately to the backend without waiting for the user to click "save". */
+        instasave: false,
+        /** Form is initially disabled. The user has to enable edit mode to make changes. */
+        requestedit: false,
+        /** The form is always editable. */
+        alwayseditable: false,
+        /** Suppress all reloads. */
+        suppressreload: false,
+        /** Set focus to this field if edit mode starts (default: first visible). */
+        setfocusto: ":input:visible:first",
+        /** Send debug output to console. */
+        debug: false,
 
-        event_root: "",                         // Use the form element as event root by default
+        /** Use the form element as event root by default. */
+        event_root: "",
 
-        btn_save: "*[type=submit]",             // Selector for the "save" button
-        key_save: "ctrl+s",                     // Hotkey to save the from
+        /** Selector for the "save" button. */
+        btn_save: "*[type=submit]",
+        /** Hotkey to save the form. */
+        key_save: "ctrl+s",
 
-        btn_reset: "*[type=reset]",             // Selector for the "reset" button
-        key_reset: "esc",                       // Hotkey to reset the form
+        /** Selector for the "reset" button. */
+        btn_reset: "*[type=reset]",
+        /** Hotkey to reset the form. */
+        key_reset: "esc",
 
-        btn_startedit: "",                      // Selector for the "edit" button
-        key_startedit: "ctrl+b",                // Hotkey to start edit mode
+        /** Selector for the "edit" button. */
+        btn_startedit: "",
+        /** Hotkey to start edit mode */
+        key_startedit: "ctrl+b",
 
-        btn_delete: "",                         // Selector for the "delete" button
-        key_delete: "del",                      // Hotkey to delete the row
+        /** Selector for the "delete" button. */
+        btn_delete: "",
+        /** Hotkey to delete the row. */
+        key_delete: "del",
 
-        btn_favourite: "",                      // Selector for the "favourite" button
-        key_favourite: "",                      // Hotkey to set/unset the favourite flag
+        /** Selector for the "favourite" button. @deprecated */
+        btn_favourite: "",
+        /** Hotkey to set/unset the favourite flag. */
+        key_favourite: "",
 
-        row: null,                              // Form data
+        /** Form data */
+        row: null,
+        /** Row uniqueid */
+        uniqueid: null,
 
         // Callback hooks
         callback: {
@@ -117,6 +139,10 @@
         this._defaults = defaults;
         /** form element, this plugin belongs to */
         this.element = element;
+        /** debug button, associated to the plugin */
+        this.debugBtn=$('button[data-bs-target="#' + this.element.attr('id') + '-debug-modal');
+        /** debug modal body, associated to the plugin */
+        this.debugModalBody=$('#' + this.element.attr('id') + '-debug-modal-body');
         /** Container around the element */
         this.container = null;
         /** Outermost element to consider regarding events (ex. dialog) */
@@ -163,7 +189,7 @@
 
         /**
          * Outputs debug messages to console if debug is set.
-         * @param msg
+         * @param objects
          */
         debugOutput: function (...objects) {
             if (!this.settings.debug) return;
@@ -216,11 +242,10 @@
             this.formEditMode = !this.settings.requestedit;
             this.setFormEditMode(this.formEditMode);
 
-
+            // Set empty action attribute to html_href from database model
             if (!this.element.attr('action')) {
                 this.element.attr('action', this.getRowValue(this.settings.data.html_href));
             }
-
 
             // Set "favourite" button initial status
             this.updateFavouriteButton();
@@ -240,6 +265,7 @@
          * Updates the "favourite" button.
          * Sets the content as defined in this.settings.content.favourite_on and
          * this.settings.content.favourite_off and sets the button disabled status.
+         * @deprecated
          */
         updateFavouriteButton: function () {
             this.debugOutput(this._name + '::updateFavouriteButton()');
@@ -340,9 +366,24 @@
 
 
         /**
+         * Update form status from given data. Normally data is returned from server.
+         *
+         * @param data
+         */
+        updateInitialStatus: function (data) {
+            this.debugOutput(this._name + '::updateInitialStatus(data) | data=', data);
+
+            this.initialFormStatus.forEach(function (status, index) {
+                this.initialFormStatus[index].value=data.rugaform_data[status.name];
+                this.checkChange($('#' + status.id));
+            }.bind(this));
+        },
+
+
+        /**
          * Sets edit mode of the form.
          *
-         * @param mode bool
+         * @param mode true=edit mode, false=disable edit mode
          */
         setFormEditMode: function (mode) {
             this.debugOutput(this._name + '::setFormEditMode(mode) | mode=', mode);
@@ -436,6 +477,18 @@
             if (input.hasClass('trumbowyg-textarea')) input.trumbowyg(value ? 'disable' : 'enable');
             else if (input.hasClass('selectized')) value ? input[0].selectize.disable() : input[0].selectize.enable();
             else input.prop('disabled', value);
+        },
+
+
+        /**
+         * Disable all inputs.
+         */
+        disableAllInput: function () {
+            this.debugOutput(this._name + '::disableAllInput()');
+            $(':input', this.element).each(function (index, element) {
+                const input = $(element);
+                this.setInputPropDisabled(input, true);
+            }.bind(this));
         },
 
 
@@ -553,10 +606,18 @@
             }
 
             // disable buttons
-            $(this.settings.selector.controlbutton, this.element).prop('disabled', true);
+            $('.' + this.settings.selector.controlbutton, this.eventRoot).prop('disabled', true);
+
+            // reset debug button
+            this.debugBtn.removeClass(['text-danger', 'text-success']);
+            this.debugBtn.prop('disabled', true);
+            this.debugModalBody.html('');
 
             // Serialize form data
             const serializedform = this.serializeFormData(event);
+
+            // Disable all inputs
+            this.disableAllInput();
 
             return $.ajax({
                 type: form.attr('method') === undefined ? 'POST' : form.attr('method'),
@@ -565,25 +626,45 @@
                 dataType: 'json',
                 context: this,
                 success: function (data, textStatus, jqXHR) {
-                    if (data.result === undefined) {
+                    // Set debug button and modal
+                    this.debugBtn.addClass('text-success');
+                    var html='';
+                    if(!!data.rugaform_result.finalMessage) {
+                        if((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL')
+                        {
+                            html+='<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                        } else {
+                            html+='<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                        }
+                    }
+                    this.debugModalBody.html(
+                        html +
+                        (data.rugaform_result.messages ? ('<pre class="small"><code>' + (data.rugaform_result.messages).join("\n") + '</code></pre>') : '')
+                        +
+                        (data.rugaform_query ? ('<pre class="small"><code>' + data.rugaform_query + '</code></pre>') : '')
+                    );
+
+                    this.updateInitialStatus(data);
+
+                    if (data.rugaform_result === undefined) {
                         // No result provided
                         this.callback_onSubmitSuccess(data, textStatus, jqXHR, null);
                         this.callback_onSubmit(data, textStatus, jqXHR, null);
                         return;
                     }
 
-                    if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) {
+                    if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
-                        alertify.alert('Formular', data.result.finalMessage);
+                        alertify.alert('Formular', data.rugaform_result.finalMessage);
 
                         this.callback_onSubmitFailure(data, textStatus, jqXHR, null);
                     } else {
                         // => success
-                        alertify.notify(data.result.finalMessage, 'success', 6, function () {
-                            console.log('dismissed');
+                        alertify.notify(data.rugaform_result.finalMessage, 'success', 6, function () {
+                            // console.log('dismissed');
                         });
-                        if (!!data.row) this.settings.row = data.row;
+                        if (!!data.rugaform_data) this.settings.row = data.rugaform_data;
 
                         this.callback_onSubmitSuccess(data, textStatus, jqXHR, null);
                     }
@@ -591,6 +672,10 @@
                     this.callback_onSubmit(data, textStatus, jqXHR, null);
                 }.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
+                    // Set debug button and modal
+                    this.debugBtn.addClass('text-danger');
+                    this.debugModalBody.html('<div class="alert alert-danger" role="alert">' + textStatus + '</div>');
+
                     console.log("errorThrown=", errorThrown);
                     alertify.alert('Formular', 'Die Forumlar-Daten konnten nicht übermittelt werden.');
                     this.callback_onSubmitFailure(null, textStatus, jqXHR, errorThrown);
@@ -602,9 +687,10 @@
                         else console.log("AJAX: " + textStatus + " responseText=", jqXHR.responseText);
                     }
 
-                    // Enable "save" button
-                    $(this.settings.btn_save, this.eventRoot).prop('disabled', false);
-                    // TODO: was machen wir hier?
+                    // enable debug button
+                    this.debugBtn.prop('disabled', false);
+
+                    // this.setFormEditMode(true);
                 }.bind(this)
             });
         },
@@ -622,10 +708,18 @@
             const form = this.element;
 
             // disable buttons
-            $(this.settings.selector.controlbutton, this.element).prop('disabled', true);
+            $('.' + this.settings.selector.controlbutton, this.eventRoot).prop('disabled', true);
+
+            // reset debug button
+            this.debugBtn.removeClass(['text-danger', 'text-success']);
+            this.debugBtn.prop('disabled', true);
+            this.debugModalBody.html('');
 
             // Serialize form data
             const serializedform = this.serializeFormData(event);
+
+            // Disable all inputs
+            this.disableAllInput();
 
             return $.ajax({
                 type: 'DELETE',
@@ -635,6 +729,24 @@
                 dataType: 'json',
                 context: this,
                 success: function (data, textStatus, jqXHR) {
+                    // Set debug button and modal
+                    this.debugBtn.addClass('text-success');
+                    var html='';
+                    if(!!data.rugaform_result.finalMessage) {
+                        if((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL')
+                        {
+                            html+='<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                        } else {
+                            html+='<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                        }
+                    }
+                    this.debugModalBody.html(
+                        html +
+                        (data.rugaform_result.messages ? ('<pre class="small"><code>' + (data.rugaform_result.messages).join("\n") + '</code></pre>') : '')
+                        +
+                        (data.rugaform_query ? ('<pre class="small"><code>' + data.rugaform_query + '</code></pre>') : '')
+                    );
+
                     if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
@@ -655,6 +767,10 @@
 
                 }.bind(this),
                 error: function (jqXHR, textStatus, errorThrown) {
+                    // Set debug button and modal
+                    this.debugBtn.addClass('text-danger');
+                    this.debugModalBody.html('<div class="alert alert-danger" role="alert">' + textStatus + '</div>');
+
                     console.log("errorThrown=", errorThrown);
                     alertify.alert('Formular', 'Der Lösch-Befehl konnte nicht an den Server übermittelt werden.');
                     this.callback_onDeleteFailure(null, textStatus, jqXHR, errorThrown);
@@ -666,8 +782,10 @@
                         else console.log("AJAX: " + textStatus + " responseText=", jqXHR.responseText);
                     }
 
-                    // Enable "save" button
-                    $(this.settings.btn_save, this.eventRoot).prop('disabled', true);
+                    // enable debug button
+                    this.debugBtn.prop('disabled', false);
+
+                    // this.setFormEditMode(true);
                 }.bind(this)
             });
         },
@@ -691,7 +809,10 @@
                 this.checkChange(input);
             }.bind(this));
             */
-            location.reload();
+            // location.reload();
+
+            // this.getInitialStatus();
+            this.setFormEditMode(false);
             return Promise.resolve();
         },
 
@@ -710,9 +831,9 @@
             // Serialize form data
             const serializedform = $(form).serializeArray();
 
-            // uniqueid mitschicken
+            // send uniqueid
             const uniqueid = this.getRowValue(this.settings.data.uniqueid);
-            serializedform.push({name: 'rugaform_uniqueid', value: uniqueid});
+            serializedform.push({name: 'rugaform_uniqueid', value: this.settings.uniqueid});
 
             // Find checkboxes which would not be sent because they are not checked
             // Send the value from the data-off-value attribute
@@ -755,6 +876,7 @@
                 }.bind(this));
             }
 
+            // Add the submit reason, if possible
             if (typeof event !== 'undefined') {
                 // Also send the button, which triggered the submit action
                 if (event.target.name && event.target.value)
@@ -779,6 +901,7 @@
 
         /**
          * Toggle the favourite flag.
+         * @deprecated
          *
          * @param event
          * @returns {Promise}
@@ -845,9 +968,11 @@
             const el = $(element);  // The input
             let elView = el;        // The visible part of the input
             let initialstatus = this.getInitialStatus(el);
-            let isChanged = initialstatus;
+            let isChanged = false;
 
-            if ((el.attr('type') === 'checkbox') || (el.attr('type') === 'radio')) {
+            if (el.attr('tagName') === 'xBUTTON') {
+                isChanged = false;
+            } else if ((el.attr('type') === 'checkbox') || (el.attr('type') === 'radio')) {
                 if (el.data('toggle'))
                     elView = el.closest('.toggle');
 
@@ -857,7 +982,7 @@
                     elView = el.parent().find('.select2-container').eq(0);
                 }
 
-                isChanged = (el.val() !== initialstatus.value);
+                isChanged = (initialstatus.value !== undefined) && (el.val() !== initialstatus.value);
             }
 
             if (isChanged) elView.addClass(this.settings.selector.changed);
@@ -920,6 +1045,7 @@
 
         /**
          * Checks, if "favourite" button should be enabled.
+         * @deprecated
          *
          * @returns boolean
          */
@@ -951,9 +1077,9 @@
             this.debugOutput(this._name + '::submit(event) | event=', event);
 
             return this.submitForm(event).then(function (data) {
-                if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) return;
+                if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
                 if (this.settings.suppressreload) return;
-                if (data.result.successUrl !== '') location.href = data.result.successUrl;
+                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
             }.bind(this));
         },
 
@@ -966,9 +1092,9 @@
             this.debugOutput(this._name + '::delete(event) | event=', event);
 
             return this.deleteForm(event).then(function (data) {
-                if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) return;
+                if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
                 if (this.settings.suppressreload) return;
-                if (data.result.successUrl !== '') location.href = data.result.successUrl;
+                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
             }.bind(this));
         },
 
@@ -1004,15 +1130,15 @@
                 dataType: 'json',
                 context: this,
                 success: function (data, textStatus, jqXHR) {
-                    if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) {
+                    if ((data.result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
-                        alertify.alert('Formular', data.result.finalMessage);
+                        alertify.alert('Formular', data.rugaform_result.finalMessage);
 
                         this.callback_onRefreshFailure(data, textStatus, jqXHR, null);
                     } else {
                         // => success
-                        alertify.notify(data.result.finalMessage, 'success', 6, function () {
+                        alertify.notify(data.rugaform_result.finalMessage, 'success', 6, function () {
                             console.log('dismissed');
                         });
                         if (!!data.row) this.settings.row = data.row;
@@ -1105,10 +1231,10 @@
         event.preventDefault();
         event.stopPropagation();
         return this.submitForm(event).then(data => {
-            if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) return;
+            if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
             if (this.settings.suppressreload) return;
-            if (data.result.successUrl !== '') {
-                location.href = data.result.successUrl;
+            if (data.rugaform_successuri !== '') {
+                location.href = data.rugaform_successuri;
                 return;
             }
             this.refreshForm();
@@ -1170,8 +1296,8 @@
                 alertify.success('Ok');
                 return this.deleteForm(event).then(function (data) {
                     if (this.settings.suppressreload) return;
-                    if (data.result.successUrl !== '') {
-                        location.href = data.result.successUrl;
+                    if (data.rugaform_successuri !== '') {
+                        location.href = data.rugaform_successuri;
                         return;
                     }
                     this.refreshForm();

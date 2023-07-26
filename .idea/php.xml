@@ -93,6 +93,12 @@
       <path value="$PROJECT_DIR$/vendor/rugalib/asset-alertifyjs" />
       <path value="$PROJECT_DIR$/vendor/rugalib/asset-jquery-validation" />
       <path value="$PROJECT_DIR$/vendor/rugalib/ruga-std" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-hydrator" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-filter" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-validator" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-inputfilter" />
+      <path value="$PROJECT_DIR$/vendor/laminas/laminas-form" />
+      <path value="$PROJECT_DIR$/vendor/fig/http-message-util" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.4" />
