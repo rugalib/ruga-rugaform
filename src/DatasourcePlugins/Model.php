@@ -80,16 +80,18 @@ class Model implements DatasourcePluginInterface
                 if(!$row->isNew()) $rugaformResponse->setUniqueid($row->uniqueid);
                 $rugaformResponse->setData($row->toArray());
                 $rugaformResponse->setFinalMessage('Datensatz neu gelesen.', 'INFORMATIONAL', 'RESULT');
+            
             } elseif ($rugaformRequest->isFormDeleteRequest()) {
                 \Ruga\Log::log_msg("DELETE {$row->idname}");
                 try {
                     $row->delete();
                     $row = null;
-                    $rugaformResponse->setSuccessUri('#');
+                    $rugaformResponse->setSuccessUri('');
                     $rugaformResponse->setFinalMessage('Erfolgreich gelöscht.', 'INFORMATIONAL', 'RESULT');
                 } catch (\Exception $e) {
                     $rugaformResponse->setFinalMessage($e->getMessage(), 'ERROR', 'RESULT');
                 }
+                
             } elseif ($rugaformRequest->isFormSetFavourite()) {
                 \Ruga\Log::log_msg("POST SET FAVOURITE {$row->idname}");
                 /*

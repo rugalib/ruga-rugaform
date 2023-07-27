@@ -755,15 +755,15 @@
                         (data.rugaform_query ? ('<pre class="small"><code>' + data.rugaform_query + '</code></pre>') : '')
                     );
 
-                    if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) {
+                    if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
-                        alertify.alert('Formular', data.result.finalMessage);
+                        alertify.alert('Formular', data.rugaform_result.finalMessage);
 
                         this.callback_onDeleteFailure(data, textStatus, jqXHR, null);
                     } else {
                         // => success
-                        alertify.notify(data.result.finalMessage, 'success', 6, function () {
+                        alertify.notify(data.rugaform_result.finalMessage, 'success', 6, function () {
                             console.log('dismissed');
                         });
                         if (!!data.row) this.settings.row = data.row;
@@ -932,10 +932,10 @@
                 dataType: 'json',
                 context: this,
                 success: function (data, textStatus, jqXHR) {
-                    if ((data.result.finalSeverity !== 'DEBUG') && (data.result.finalSeverity !== 'INFORMATIONAL')) {
+                    if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
-                        alertify.alert('Formular', data.result.finalMessage);
+                        alertify.alert('Formular', data.rugaform_result.finalMessage);
 
                         this.callback_onFavouriteFailure(data, textStatus, jqXHR, null);
                     } else {
@@ -1140,7 +1140,7 @@
                 dataType: 'json',
                 context: this,
                 success: function (data, textStatus, jqXHR) {
-                    if ((data.result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
+                    if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
                         alertify.alert('Formular', data.rugaform_result.finalMessage);
