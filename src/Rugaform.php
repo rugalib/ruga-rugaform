@@ -45,7 +45,7 @@ class Rugaform implements ConfigurationInterface
         
         $this->id = $config['id'] ?? null;
         
-        $this->uniqueid = $uniqueid;
+        $this->uniqueid = $uniqueid ?? $this->getConfig('uniqueid') ?? null;
         
         
         if ($form === null) {

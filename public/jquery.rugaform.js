@@ -834,9 +834,11 @@
             // Serialize form data
             const serializedform = $(form).serializeArray();
 
-            // send uniqueid
-            const uniqueid = this.getRowValue(this.settings.data.uniqueid);
-            serializedform.push({name: 'rugaform_uniqueid', value: this.settings.uniqueid});
+            // send uniqueid from row data or from the options, if it does not exist in the form
+            const uniqueid = !!this.settings.uniqueid ? this.settings.uniqueid : this.getRowValue(this.settings.data.uniqueid);
+            if(!serializedform.some(function(item){return item.name === "rugaform_uniqueid";}) && (!!uniqueid)) {
+                serializedform.push({name: 'rugaform_uniqueid', value: uniqueid});
+            }
 
             // Find checkboxes which would not be sent because they are not checked
             // Send the value from the data-off-value attribute
