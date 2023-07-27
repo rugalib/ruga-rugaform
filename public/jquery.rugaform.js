@@ -9,6 +9,11 @@
  * data-rugaform-off-value: value to send, if the checkbox input is not checked
  * data-rugaform-sendvalue: value to send, regardless of the input's status
  *
+ *
+ * Events:
+ * rugaform.startedit:
+ * rugaform.endedit:
+ *
  */
 
 ;(function ($, window, document, undefined) {
@@ -395,6 +400,9 @@
          */
         setFormEditMode: function (mode) {
             this.debugOutput(this._name + '::setFormEditMode(mode) | mode=', mode);
+
+            if(!!mode) this.element.trigger('rugaform.startedit');
+            else this.element.trigger('rugaform.endedit');
 
             // If edit mode feature ist disabled, always set form to edit mode
             if (!this.settings.requestedit) mode = true;
