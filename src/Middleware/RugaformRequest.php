@@ -25,14 +25,21 @@ class RugaformRequest
     
     public function __construct(ServerRequestInterface $request)
     {
-        $this->request = $request;
+        // Store data in request, if method is DELETE
+        // PHP and Laminas do not do this for DELETE
+        if($request->getMethod() == RequestMethodInterface::METHOD_DELETE) {
+            $data=[];
+            parse_str($request->getBody()->getContents(), $data);
+            $this->request = $request->withParsedBody($data);
+        } else {
+            $this->request = $request;
+        }
         
         if ($this->request->getMethod() == RequestMethodInterface::METHOD_GET) {
             $this->data = (array)$this->request->getQueryParams() ?? null;
         } else {
             $this->data = (array)$this->request->getParsedBody() ?? null;
         }
-//        file_put_contents('tmp/RugaformRequest.json', json_encode($this->data, JSON_PRETTY_PRINT));
     }
     
     
