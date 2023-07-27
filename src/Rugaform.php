@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ruga\Rugaform;
 
 use Laminas\Form\Element\Hidden;
+use Laminas\Form\Form;
 use Laminas\Form\FormInterface;
 use Laminas\Form\View\Helper\FormHidden;
 use Ruga\Rugaform\ConfigurationTrait;
@@ -30,9 +31,12 @@ class Rugaform implements ConfigurationInterface
     /** @var string Database uniqueid */
     private $uniqueid;
     
+    /** @var FormInterface */
+    private FormInterface $form;
     
     
-    public function __construct(FormInterface $form, string $uniqueid, array $config = [])
+    
+    public function __construct(array $config = [], ?FormInterface $form = null, ?string $uniqueid = null)
     {
         // Set rowId to "uniqueid" by default
         $config['rowId'] = $config['rowId'] ?? 'uniqueid';
@@ -43,7 +47,12 @@ class Rugaform implements ConfigurationInterface
         
         $this->uniqueid = $uniqueid;
         
+        
+        if ($form === null) {
+            $form = new Form($this->getId());
+        }
         $this->updateForm($form);
+        $this->form = $form;
     }
     
     
@@ -170,4 +179,20 @@ JS;
     {
         return $this->renderHtml() . $this->renderJavascript();
     }
+    
+    
+    
+    public function openTag(): string
+    {
+        $helper = new \Laminas\Form\View\Helper\Form();
+        return $helper()->openTag($this->form);
+    }
+    
+    
+    
+    public function closeTag(): string
+    {
+        return '</form>';
+    }
+    
 }
