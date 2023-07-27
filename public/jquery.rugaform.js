@@ -13,6 +13,8 @@
  * Events:
  * rugaform.startedit:
  * rugaform.endedit:
+ * rugaform.submitsuccess
+ * rugaform.submitfailure
  *
  */
 
@@ -666,6 +668,7 @@
                         // No result provided
                         this.callback_onSubmitSuccess(data, textStatus, jqXHR, null);
                         this.callback_onSubmit(data, textStatus, jqXHR, null);
+                        this.element.trigger('rugaform.submitsuccess');
                         return;
                     }
 
@@ -675,6 +678,7 @@
                         alertify.alert('Formular', data.rugaform_result.finalMessage);
 
                         this.callback_onSubmitFailure(data, textStatus, jqXHR, null);
+                        this.element.trigger('rugaform.submitfailure');
                     } else {
                         // => success
                         alertify.notify(data.rugaform_result.finalMessage, 'success', 6, function () {
@@ -683,6 +687,7 @@
                         if (!!data.rugaform_data) this.settings.row = data.rugaform_data;
 
                         this.callback_onSubmitSuccess(data, textStatus, jqXHR, null);
+                        this.element.trigger('rugaform.submitsuccess');
                     }
 
                     this.callback_onSubmit(data, textStatus, jqXHR, null);
