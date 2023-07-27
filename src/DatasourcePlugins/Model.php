@@ -53,6 +53,7 @@ class Model implements DatasourcePluginInterface
         /** @var AbstractTable $table */
         $table = $this->getModelFromRequest($rugaformRequest);
         
+        $newRowCreated=true;
         
         // Get row_id from request
         $row_id = $rugaformRequest->getUniqueid();
@@ -69,6 +70,7 @@ class Model implements DatasourcePluginInterface
             $rugaformResponse->addMessage("Found Object {$row->type} {$row->idname}");
             \Ruga\Log::log_msg("Found Object {$row->type} {$row->idname}");
             $rugaformResponse->setQuery(get_class($table) . "->findById(\"{$row_id}\")->current(): " . get_class($row));
+            $newRowCreated=false;
         }
         
         $rugaformResponse->setData($row->toArray());
@@ -135,11 +137,14 @@ class Model implements DatasourcePluginInterface
                     
                     $row->save();
                     
-                    if ($row_id != $row->row_id) {
-                        // TODO generate correct url
-//                        $rugaformResponse->setSuccessUri("request/{$row->id}/edit");
-                    } else {
-                        $rugaformResponse->setSuccessUri('');
+                    
+                    
+                    
+                    $rugaformResponse->setSuccessUri('');
+                    if($newRowCreated) {
+                        // TODO This is not cool
+                        $referer=implode('', $rugaformRequest->getRequest()->getHeaders()['referer'] ?? []);
+                        $rugaformResponse->setSuccessUri(str_replace('new', $row->PK, $referer));
                     }
                     
                     $rugaformResponse->setUniqueid($row->uniqueid);
