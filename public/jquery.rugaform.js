@@ -256,6 +256,11 @@
             // Set the event handlers
             this.addEventHandlers();
 
+            // Hide buttons, if inside a dialog
+            if(this.element.closest('div.ui-dialog').length > 0) {
+                $('.' + this.settings.selector.controlbutton, this.eventRoot).prop('disabled', true).hide();
+            }
+
             // Initialize form validation plugin if validation is set to true
             if (this.settings.validation) {
                 if (this.settings.debug) this.settings.validation_options.debug = true;
