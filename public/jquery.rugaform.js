@@ -138,6 +138,9 @@
         this.pluginName = pluginName;
         this._defaults = defaults;
         /** form element, this plugin belongs to */
+        if(element.length > 1) {
+            throw new Error('More than one form provided for initialization');
+        }
         this.element = element;
         /** debug button, associated to the plugin */
         this.debugBtn=$('button[data-bs-target="#' + this.element.attr('id') + '-debug-modal');
