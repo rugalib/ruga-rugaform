@@ -84,20 +84,39 @@
     font-size: 90%;
 }
 
-
-
 .rugaform__container .form-condensed fieldset {
-    border: 1px solid #DDDDDD;
-    padding: 0px 6px 2px 6px;
+    all: revert;
 }
 
 .rugaform__container .form-condensed legend {
-    font-size: 100%;
-    width: auto;
-    margin-left: 6px;
-    padding: 0px 2px;
+    all: revert;
+}
+
+
+.rugaform__container .form-condensed fieldset {
+    transition: ease-in-out 1s;
+    border: 1px solid #DDDDDD;
+    border-radius: 4px;
+    /*padding: 0px 6px 2px 6px;*/
+}
+.rugaform__container .form-condensed fieldset:hover {
+    transition: ease-in-out 1s;
+    border: 1px solid #666666;
+}
+
+.rugaform__container .form-condensed fieldset legend {
+    transition: ease-in-out 1s;
+    color: #888888;
+    /*font-size: 100%;*/
+    /*width: auto;*/
+    /*margin-left: 6px;*/
+    /*padding: 0px 2px;*/
     /*padding-top: 10px;*/
     /*margin-bottom: 10px;*/
+}
+.rugaform__container .form-condensed fieldset:hover legend {
+    transition: ease-in-out 1s;
+    color: #555555;
 }
 
 
