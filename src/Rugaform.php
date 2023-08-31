@@ -7,8 +7,6 @@ namespace Ruga\Rugaform;
 use Laminas\Form\Element\Hidden;
 use Laminas\Form\Form;
 use Laminas\Form\FormInterface;
-use Laminas\Form\View\Helper\FormHidden;
-use Ruga\Rugaform\ConfigurationTrait;
 
 class Rugaform implements ConfigurationInterface
 {
@@ -145,7 +143,7 @@ HTML;
         $customSqlData = json_encode($this->getConfig('customSqlData', null));
         
         $str = /** @lang JavaScript */
-            <<<JS
+            <<<"JS"
 (function($, window, document) {
     const customSqlData=''+{$customSqlData};
     
@@ -157,9 +155,10 @@ HTML;
                 btn_startedit: '{$this->getConfig('btn_startedit', 'button[name=switchtoeditmode]')}',
                 btn_delete: '{$this->getConfig('btn_delete', 'button[name=delete]')}',
                 btn_favourite: '{$this->getConfig('btn_favourite', '[data-widget=favourite]')}',
+                row: {$this->getConfig('row', '{}')},
                 uniqueid: '{$this->uniqueid}',
                 validation_options: {
-                    ignore: ":hidden, [type=date]"
+                    ignore: ':hidden, [type=date]'
                 }
             });
     });

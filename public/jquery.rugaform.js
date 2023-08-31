@@ -5,7 +5,7 @@
  *
  *
  * HTML5 tags:
- * data-rugaform-editable : (never|always)
+ * data-rugaform-editable : (never|always|saved)
  * data-rugaform-off-value: value to send, if the checkbox input is not checked
  * data-rugaform-sendvalue: value to send, regardless of the input's status
  *
@@ -433,7 +433,9 @@
                     // user can change data in row? false=>disable input
                     if (this.getRowValue(this.settings.data.canBeChangedBy) === false) newdisabledstatus = true;
 
-                    // Attribute data-rugaform-editable is set? always=>enable input / never=>disable input
+                    // Attribute data-rugaform-editable is set?
+                    // always=>enable input / never=>disable input / saved=>enable input, when form was saved previously
+                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew)===undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
                     if (initialstatus.editable === 'always') newdisabledstatus = false;
                     if (initialstatus.editable === 'never') newdisabledstatus = true;
 
@@ -441,7 +443,9 @@
                     if (this.getRowValue(this.settings.data.isDeleted) === true) newdisabledstatus = true;
                 } else {
                     newdisabledstatus = true;
-                    // Attribute data-rugaform-editable is set? always=>enable input / never=>disable input
+                    // Attribute data-rugaform-editable is set?
+                    // always=>enable input / never=>disable input / saved=>enable input, when form was saved previously
+                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew)===undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
                     if (initialstatus.editable === 'always') newdisabledstatus = false;
                     if (initialstatus.editable === 'never') newdisabledstatus = true;
                 }
