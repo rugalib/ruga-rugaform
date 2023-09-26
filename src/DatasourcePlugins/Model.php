@@ -62,7 +62,7 @@ class Model implements DatasourcePluginInterface
         
         // No Object found => create new
         if (!$row) {
-            $row = $table->createRow();
+            $row = $table->createRow($rugaformRequest->getData());
             $rugaformResponse->addMessage("New Object {$row->type} created.");
             \Ruga\Log::log_msg("New Object {$row->type} created.");
             $rugaformResponse->setQuery(get_class($table) . "->createRow(): " . get_class($row));
