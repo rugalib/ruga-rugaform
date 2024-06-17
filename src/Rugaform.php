@@ -18,6 +18,7 @@ class Rugaform implements ConfigurationInterface
     const SUBMIT_REASON = 'rugaform_submit_reason';
     const FAVOURITE = 'rugaform_favourite';
     const SUCCESS_URI = 'rugaform_successuri';
+    const REDIRECTION_DELAY = 'rugaform_redirection_delay';
     const RESULT = 'rugaform_result';
     const ERROR = 'rugaform_error';
     const ERROR_EXCEPTION = 'rugaform_error_exception';

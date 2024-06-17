@@ -23,7 +23,7 @@ class RugaformResponse implements \JsonSerializable
     private array $data = [];
     
     /** @var string|null Unique ID of the row. NULL, if new row. */
-    private $uniqueid = null;
+    private ?string $uniqueid = null;
     
     /** @var string Executed query/method. */
     private string $query = '';
@@ -35,13 +35,16 @@ class RugaformResponse implements \JsonSerializable
     private string $finalMessage = '';
     
     /** @var string|null Final message severity. */
-    private $finalSeverity = null;
+    private ?string $finalSeverity = null;
     
     /** @var string|null Final message type (STATUS|RESULT). */
-    private $finalType = null;
+    private ?string $finalType = null;
     
-    /** @var UriInterface|null The URI to be called after a successful operation. */
-    private $successUri = null;
+    /** @var string|null The URI to be called after a successful operation. */
+    private ?string $successUri = null;
+    
+    /** @var int Delay in ms before the form reloads or switches to a new page. */
+    private int $redirectionDelay = 0;
     
     
     
@@ -104,14 +107,29 @@ class RugaformResponse implements \JsonSerializable
     
     
     
-    public function setSuccessUri($uri)
+    /**
+     * Set the success URI and redirection delay.
+     *
+     * @param string $uri              The success URI.
+     * @param int    $redirectionDelay The delay in milliseconds before redirecting to the success URI. Default value
+     *                                 is 3000 (3 seconds).
+     *
+     * @return void
+     */
+    public function setSuccessUri(string $uri, int $redirectionDelay = 3000)
     {
         $this->successUri = $uri;
+        $this->setRedirectionDelay($redirectionDelay);
     }
     
     
     
-    public function getSuccessUri()
+    /**
+     * Get the success URI.
+     *
+     * @return string|null The success URI, or null if not set.
+     */
+    public function getSuccessUri(): string
     {
         return $this->successUri;
     }
@@ -129,6 +147,34 @@ class RugaformResponse implements \JsonSerializable
     public function getQuery(): string
     {
         return $this->query;
+    }
+    
+    
+    
+    /**
+     * Get the redirection delay.
+     *
+     * @return int The redirection delay in seconds.
+     * @see RugaformResponse::setRedirectionDelay())
+     */
+    public function getRedirectionDelay(): int
+    {
+        return $this->redirectionDelay;
+    }
+    
+    
+    
+    /**
+     * Set the redirection delay for the object. This is the delay before a form is reloaded or the browser switches
+     * to a new page after form submitted successfully.
+     *
+     * @param int $redirectionDelay The redirection delay to set in milliseconds.
+     *
+     * @return void
+     */
+    public function setRedirectionDelay(int $redirectionDelay): void
+    {
+        $this->redirectionDelay = $redirectionDelay;
     }
     
     
@@ -160,6 +206,7 @@ class RugaformResponse implements \JsonSerializable
         $uniqueid = Rugaform::UNIQUEID;
         $favourite = Rugaform::FAVOURITE;
         $success_uri = Rugaform::SUCCESS_URI;
+        $redirectionDelay = Rugaform::REDIRECTION_DELAY;
         $result = Rugaform::RESULT;
         $error = Rugaform::ERROR;
         $query = Rugaform::QUERY;
@@ -171,14 +218,15 @@ class RugaformResponse implements \JsonSerializable
         $o->$result = null;
         $o->$error = null; // Optional: If an error occurs during the running of the server-side processing script
         $o->$success_uri = null;
+        $o->$redirectionDelay = null;
         $o->$uniqueid = null;
         $o->$favourite = null; // The data to be displayed in the form.
         $o->$data = null; // The data to be displayed in the form.
         
-        
         try {
             $o->$data = $this->getData();
             $o->$success_uri = $this->getSuccessUri() ?? '';
+            $o->$redirectionDelay = $this->getRedirectionDelay();
             $o->$uniqueid = $this->getUniqueid();
             $o->$result = [
                 'finalMessage' => $this->finalMessage,

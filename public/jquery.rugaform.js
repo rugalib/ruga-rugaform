@@ -1111,8 +1111,7 @@
 
             return this.submitForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if (this.settings.suppressreload) return;
-                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
+                this._handleSuccessUri(data);
             }.bind(this));
         },
 
@@ -1126,8 +1125,7 @@
 
             return this.deleteForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if (this.settings.suppressreload) return;
-                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
+                this._handleSuccessUri(data);
             }.bind(this));
         },
 
@@ -1265,21 +1263,7 @@
         event.stopPropagation();
         return this.submitForm(event).then(data => {
             if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-            if (this.settings.suppressreload) return;
-
-            const successuri = typeof data.rugaform_successuri === 'string'
-                ? data.rugaform_successuri.trim()
-                : (
-                    ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
-                        ? data.rugaform_result.rugaform_successuri.trim()
-                        : ''
-                );
-
-            if (successuri !== '') {
-                location.href = successuri;
-                return;
-            }
-
+            this._handleSuccessUri(data);
             this.refreshForm();
         });
     }
@@ -1338,11 +1322,7 @@
             function () {
                 alertify.success('Ok');
                 return this.deleteForm(event).then(function (data) {
-                    if (this.settings.suppressreload) return;
-                    if (data.rugaform_successuri !== '') {
-                        location.href = data.rugaform_successuri;
-                        return;
-                    }
+                    this._handleSuccessUri(data);
                     this.refreshForm();
                 });
             }.bind(this),
@@ -1370,6 +1350,28 @@
     }
 
 
+    function _handleSuccessUri(data) {
+        if (this.settings.suppressreload) return;
+
+        const redirectionDelay = (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
+            ? data.rugaform_redirection_delay
+            : 0;
+
+        const successuri = (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
+            ? data.rugaform_successuri.trim()
+            : (
+                ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
+                    ? data.rugaform_result.rugaform_successuri.trim()
+                    : ''
+            );
+
+        if (successuri !== '') {
+            setTimeout(function() {
+                location.href = successuri;
+            }, redirectionDelay);
+        }
+    }
+
     $.extend(Plugin.prototype, {
         _onChange: _onChange,
         _onClick: _onClick,
@@ -1378,7 +1380,8 @@
         _onReset: _onReset,
         _onStartEdit: _onStartEdit,
         _onDelete: _onDelete,
-        _onFavourite: _onFavourite
+        _onFavourite: _onFavourite,
+        _handleSuccessUri: _handleSuccessUri
     });
 
 
