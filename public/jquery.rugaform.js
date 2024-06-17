@@ -699,7 +699,7 @@
                         // => success
                         if (!data.rugaform_message_display || data.rugaform_message_display === 'notifier') {
                             // Show message in toast
-                            alertify.notify(data.rugaform_result.finalMessage, 'success', this._getRedirectionDelay(data) / 1000, () => {
+                            alertify.notify(data.rugaform_result.finalMessage, 'success', this._getRedirectionDelay(data, 1000) / 1000, () => {
                                 this.readyAfterSubmit = true;
                             });
                         } else if (data.rugaform_message_display === 'alert') {
@@ -1233,13 +1233,28 @@
         },
 
 
-        _getRedirectionDelay: function (data) {
+        /**
+         * Retrieves the redirection delay from the given data object.
+         * If the 'rugaform_redirection_delay' property is present and its value is a number,
+         * it returns that value. Otherwise, it returns the provided default delay.
+         *
+         * @param {Object} data - The data object containing the 'rugaform_redirection_delay' property.
+         * @param {number} defaultDelay - The default delay value to return if 'rugaform_redirection_delay' is not a number.
+         * @returns {number} - The redirection delay value.
+         */
+        _getRedirectionDelay: function (data, defaultDelay = 0) {
             return (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
                 ? data.rugaform_redirection_delay
-                : 0;
+                : defaultDelay;
         },
 
 
+        /**
+         * Retrieves the success URI from the given data object.
+         *
+         * @param {object} data - The data object containing the success URI.
+         * @returns {string} - The success URI.
+         */
         _getSuccessUri: function (data) {
             return (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
                 ? data.rugaform_successuri.trim()
