@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: 2023 Roland Rusch, easy-smart solution GmbH <roland.rusch@easy-smart.ch>
+ * SPDX-FileCopyrightText: 2024 Roland Rusch, easy-smart solution GmbH <roland.rusch@easy-smart.ch>
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
@@ -150,14 +150,14 @@
         this.pluginName = pluginName;
         this._defaults = defaults;
         /** form element, this plugin belongs to */
-        if(element.length > 1) {
+        if (element.length > 1) {
             throw new Error('More than one form provided for initialization');
         }
         this.element = element;
         /** debug button, associated to the plugin */
-        this.debugBtn=$('button[data-bs-target="#' + this.element.attr('id') + '-debug-modal');
+        this.debugBtn = $('button[data-bs-target="#' + this.element.attr('id') + '-debug-modal');
         /** debug modal body, associated to the plugin */
-        this.debugModalBody=$('#' + this.element.attr('id') + '-debug-modal-body');
+        this.debugModalBody = $('#' + this.element.attr('id') + '-debug-modal-body');
         /** Container around the element */
         this.container = null;
         /** Outermost element to consider regarding events (ex. dialog) */
@@ -269,7 +269,7 @@
             this.addEventHandlers();
 
             // Hide buttons, if inside a dialog
-            if(this.element.closest('div.ui-dialog').length > 0) {
+            if (this.element.closest('div.ui-dialog').length > 0) {
                 $('.' + this.settings.selector.controlbutton, this.eventRoot).prop('disabled', true).hide();
             }
 
@@ -393,8 +393,9 @@
         updateInitialStatus: function (data) {
             this.debugOutput(this._name + '::updateInitialStatus(data) | data=', data);
 
+            if (!data.rugaform_data) return;
             this.initialFormStatus.forEach(function (status, index) {
-                this.initialFormStatus[index].value=data.rugaform_data[status.name];
+                this.initialFormStatus[index].value = data.rugaform_data[status.name];
                 this.checkChange($('#' + status.id));
             }.bind(this));
         },
@@ -408,7 +409,7 @@
         setFormEditMode: function (mode) {
             this.debugOutput(this._name + '::setFormEditMode(mode) | mode=', mode);
 
-            if(!!mode) this.element.trigger('rugaform.startedit');
+            if (!!mode) this.element.trigger('rugaform.startedit');
             else this.element.trigger('rugaform.endedit');
 
             // If edit mode feature ist disabled, always set form to edit mode
@@ -440,7 +441,7 @@
 
                     // Attribute data-rugaform-editable is set?
                     // always=>enable input / never=>disable input / saved=>enable input, when form was saved previously
-                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew)===undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
+                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew) === undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
                     if (initialstatus.editable === 'always') newdisabledstatus = false;
                     if (initialstatus.editable === 'never') newdisabledstatus = true;
 
@@ -450,7 +451,7 @@
                     newdisabledstatus = true;
                     // Attribute data-rugaform-editable is set?
                     // always=>enable input / never=>disable input / saved=>enable input, when form was saved previously
-                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew)===undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
+                    if (initialstatus.editable === 'saved') newdisabledstatus = (this.getRowValue(this.settings.data.isNew) === undefined) ? true : !!this.getRowValue(this.settings.data.isNew);
                     if (initialstatus.editable === 'always') newdisabledstatus = false;
                     if (initialstatus.editable === 'never') newdisabledstatus = true;
                 }
@@ -655,13 +656,12 @@
                 success: function (data, textStatus, jqXHR) {
                     // Set debug button and modal
                     this.debugBtn.addClass('text-success');
-                    var html='';
-                    if(!!data.rugaform_result.finalMessage) {
-                        if((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL')
-                        {
-                            html+='<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                    var html = '';
+                    if (!!data.rugaform_result.finalMessage) {
+                        if ((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL') {
+                            html += '<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
                         } else {
-                            html+='<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                            html += '<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
                         }
                     }
                     this.debugModalBody.html(
@@ -761,13 +761,12 @@
                 success: function (data, textStatus, jqXHR) {
                     // Set debug button and modal
                     this.debugBtn.addClass('text-success');
-                    var html='';
-                    if(!!data.rugaform_result.finalMessage) {
-                        if((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL')
-                        {
-                            html+='<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                    var html = '';
+                    if (!!data.rugaform_result.finalMessage) {
+                        if ((data.rugaform_result.finalSeverity === 'DEBUG') || data.rugaform_result.finalSeverity === 'INFORMATIONAL') {
+                            html += '<div class="alert alert-success" role="alert">' + data.rugaform_result.finalMessage + '</div>'
                         } else {
-                            html+='<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
+                            html += '<div class="alert alert-danger" role="alert">' + data.rugaform_result.finalMessage + '</div>'
                         }
                     }
                     this.debugModalBody.html(
@@ -863,7 +862,9 @@
 
             // send uniqueid from row data or from the options, if it does not exist in the form
             const uniqueid = !!this.settings.uniqueid ? this.settings.uniqueid : this.getRowValue(this.settings.data.uniqueid);
-            if(!serializedform.some(function(item){return item.name === "rugaform_uniqueid";}) && (!!uniqueid)) {
+            if (!serializedform.some(function (item) {
+                return item.name === "rugaform_uniqueid";
+            }) && (!!uniqueid)) {
                 serializedform.push({name: 'rugaform_uniqueid', value: uniqueid});
             }
 
@@ -1110,8 +1111,9 @@
 
             return this.submitForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if (this.settings.suppressreload) return;
-                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
+                if(!this._handleSuccessUri(data)) {
+                    this.refreshForm();
+                }
             }.bind(this));
         },
 
@@ -1125,8 +1127,9 @@
 
             return this.deleteForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if (this.settings.suppressreload) return;
-                if (data.rugaform_successuri !== '') location.href = data.rugaform_successuri;
+                if(!this._handleSuccessUri(data)) {
+                    this.refreshForm();
+                }
             }.bind(this));
         },
 
@@ -1199,6 +1202,41 @@
             });
         },
 
+        /**
+         * Handles success uri redirection.
+         *
+         * @param {object} data - The data object.
+         * @param {string} [data.rugaform_redirection_delay] - The time delay for redirection in milliseconds.
+         * @param {string} [data.rugaform_successuri] - The success URI.
+         * @param {object} [data.rugaform_result] - The result object.
+         * @param {string} [data.rugaform_result.rugaform_successuri] - The success URI.
+         *
+         * @return {boolean} Returns true if successuri triggers a redirection, otherwise false.
+         */
+        _handleSuccessUri: function (data) {
+            if (this.settings.suppressreload) return false;
+
+            const redirectionDelay = (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
+                ? data.rugaform_redirection_delay
+                : 0;
+
+            const successuri = (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
+                ? data.rugaform_successuri.trim()
+                : (
+                    ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
+                        ? data.rugaform_result.rugaform_successuri.trim()
+                        : ''
+                );
+
+            if (successuri !== '') {
+                setTimeout(function() {
+                    location.href = successuri;
+                }, redirectionDelay);
+                return true;
+            }
+            return false;
+        },
+
 
         dummy: function () {
         }
@@ -1264,12 +1302,9 @@
         event.stopPropagation();
         return this.submitForm(event).then(data => {
             if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-            if (this.settings.suppressreload) return;
-            if (data.rugaform_successuri !== '') {
-                location.href = data.rugaform_successuri;
-                return;
+            if(!this._handleSuccessUri(data)) {
+                this.refreshForm();
             }
-            this.refreshForm();
         });
     }
 
@@ -1327,12 +1362,9 @@
             function () {
                 alertify.success('Ok');
                 return this.deleteForm(event).then(function (data) {
-                    if (this.settings.suppressreload) return;
-                    if (data.rugaform_successuri !== '') {
-                        location.href = data.rugaform_successuri;
-                        return;
+                    if(!this._handleSuccessUri(data)) {
+                        this.refreshForm();
                     }
-                    this.refreshForm();
                 });
             }.bind(this),
             function () {
