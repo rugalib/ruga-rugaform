@@ -1111,7 +1111,9 @@
 
             return this.submitForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                this._handleSuccessUri(data);
+                if(!this._handleSuccessUri(data)) {
+                    this.refreshForm();
+                }
             }.bind(this));
         },
 
@@ -1125,7 +1127,9 @@
 
             return this.deleteForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                this._handleSuccessUri(data);
+                if(!this._handleSuccessUri(data)) {
+                    this.refreshForm();
+                }
             }.bind(this));
         },
 
@@ -1198,6 +1202,41 @@
             });
         },
 
+        /**
+         * Handles success uri redirection.
+         *
+         * @param {object} data - The data object.
+         * @param {string} [data.rugaform_redirection_delay] - The time delay for redirection in milliseconds.
+         * @param {string} [data.rugaform_successuri] - The success URI.
+         * @param {object} [data.rugaform_result] - The result object.
+         * @param {string} [data.rugaform_result.rugaform_successuri] - The success URI.
+         *
+         * @return {boolean} Returns true if successuri triggers a redirection, otherwise false.
+         */
+        _handleSuccessUri: function (data) {
+            if (this.settings.suppressreload) return false;
+
+            const redirectionDelay = (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
+                ? data.rugaform_redirection_delay
+                : 0;
+
+            const successuri = (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
+                ? data.rugaform_successuri.trim()
+                : (
+                    ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
+                        ? data.rugaform_result.rugaform_successuri.trim()
+                        : ''
+                );
+
+            if (successuri !== '') {
+                setTimeout(function() {
+                    location.href = successuri;
+                }, redirectionDelay);
+                return true;
+            }
+            return false;
+        },
+
 
         dummy: function () {
         }
@@ -1263,8 +1302,9 @@
         event.stopPropagation();
         return this.submitForm(event).then(data => {
             if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-            this._handleSuccessUri(data);
-            this.refreshForm();
+            if(!this._handleSuccessUri(data)) {
+                this.refreshForm();
+            }
         });
     }
 
@@ -1322,8 +1362,9 @@
             function () {
                 alertify.success('Ok');
                 return this.deleteForm(event).then(function (data) {
-                    this._handleSuccessUri(data);
-                    this.refreshForm();
+                    if(!this._handleSuccessUri(data)) {
+                        this.refreshForm();
+                    }
                 });
             }.bind(this),
             function () {
@@ -1350,28 +1391,6 @@
     }
 
 
-    function _handleSuccessUri(data) {
-        if (this.settings.suppressreload) return;
-
-        const redirectionDelay = (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
-            ? data.rugaform_redirection_delay
-            : 0;
-
-        const successuri = (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
-            ? data.rugaform_successuri.trim()
-            : (
-                ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
-                    ? data.rugaform_result.rugaform_successuri.trim()
-                    : ''
-            );
-
-        if (successuri !== '') {
-            setTimeout(function() {
-                location.href = successuri;
-            }, redirectionDelay);
-        }
-    }
-
     $.extend(Plugin.prototype, {
         _onChange: _onChange,
         _onClick: _onClick,
@@ -1380,8 +1399,7 @@
         _onReset: _onReset,
         _onStartEdit: _onStartEdit,
         _onDelete: _onDelete,
-        _onFavourite: _onFavourite,
-        _handleSuccessUri: _handleSuccessUri
+        _onFavourite: _onFavourite
     });
 
 
