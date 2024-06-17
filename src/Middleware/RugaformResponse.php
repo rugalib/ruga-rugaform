@@ -1,6 +1,6 @@
 <?php
 /*
- * SPDX-FileCopyrightText: 2023 Roland Rusch, easy-smart solution GmbH <roland.rusch@easy-smart.ch>
+ * SPDX-FileCopyrightText: 2024 Roland Rusch, easy-smart solution GmbH <roland.rusch@easy-smart.ch>
  * SPDX-License-Identifier: AGPL-3.0-only
  */
 
@@ -25,8 +25,8 @@ class RugaformResponse implements \JsonSerializable
     /** @var string|null Unique ID of the row. NULL, if new row. */
     private ?string $uniqueid = null;
     
-    /** @var string Executed query/method. */
-    private string $query = '';
+    /** @var string|null Executed query/method. */
+    private ?string $query = null;
     
     /** @var array Log messages. */
     private array $messages = [];
@@ -43,8 +43,11 @@ class RugaformResponse implements \JsonSerializable
     /** @var string|null The URI to be called after a successful operation. */
     private ?string $successUri = null;
     
-    /** @var int Delay in ms before the form reloads or switches to a new page. */
-    private int $redirectionDelay = 0;
+    /** @var int Delay in ms before the form reloads, switches to a new page or notifiers dismiss. */
+    private int $redirectionDelay = 6000;
+    
+    /** @var string Defines, how the finalMessage is displayed to the user (notifier|alert). */
+    private string $messageDisplay = 'notifier';
     
     
     
@@ -116,10 +119,11 @@ class RugaformResponse implements \JsonSerializable
      *
      * @return void
      */
-    public function setSuccessUri(string $uri, int $redirectionDelay = 3000)
+    public function setSuccessUri(string $uri, int $redirectionDelay = 3000, string $messageDisplay = null)
     {
         $this->successUri = $uri;
         $this->setRedirectionDelay($redirectionDelay);
+        $this->setMessageDisplay($messageDisplay !== null ? $messageDisplay : ($uri == '' ? 'notifier' : 'alert'));
     }
     
     
@@ -129,7 +133,7 @@ class RugaformResponse implements \JsonSerializable
      *
      * @return string|null The success URI, or null if not set.
      */
-    public function getSuccessUri(): string
+    public function getSuccessUri(): ?string
     {
         return $this->successUri;
     }
@@ -144,7 +148,7 @@ class RugaformResponse implements \JsonSerializable
     
     
     
-    public function getQuery(): string
+    public function getQuery(): ?string
     {
         return $this->query;
     }
@@ -179,6 +183,32 @@ class RugaformResponse implements \JsonSerializable
     
     
     
+    /**
+     * Get the message display option.
+     *
+     * @return string The type of message display ('notifier', 'alert').
+     */
+    public function getMessageDisplay(): string
+    {
+        return $this->messageDisplay;
+    }
+    
+    
+    
+    /**
+     * Set the message display type.
+     *
+     * @param string $messageDisplay The type of message display ('notifier', 'alert').
+     *
+     * @return void
+     */
+    public function setMessageDisplay(string $messageDisplay): void
+    {
+        $this->messageDisplay = $messageDisplay;
+    }
+    
+    
+    
     public function setFilter(array $filter)
     {
         $this->filter = $filter;
@@ -207,6 +237,7 @@ class RugaformResponse implements \JsonSerializable
         $favourite = Rugaform::FAVOURITE;
         $success_uri = Rugaform::SUCCESS_URI;
         $redirectionDelay = Rugaform::REDIRECTION_DELAY;
+        $messageDisplay = Rugaform::MESSAGE_DISPLAY;
         $result = Rugaform::RESULT;
         $error = Rugaform::ERROR;
         $query = Rugaform::QUERY;
@@ -214,11 +245,12 @@ class RugaformResponse implements \JsonSerializable
         
         $o = new \stdClass();
         
-        $o->$query = $this->getQuery(); // Optional: Show query to the developer
+        $o->$query = $this->getQuery() ?? ''; // Optional: Show query to the developer
         $o->$result = null;
         $o->$error = null; // Optional: If an error occurs during the running of the server-side processing script
         $o->$success_uri = null;
         $o->$redirectionDelay = null;
+        $o->$messageDisplay = null;
         $o->$uniqueid = null;
         $o->$favourite = null; // The data to be displayed in the form.
         $o->$data = null; // The data to be displayed in the form.
@@ -227,6 +259,7 @@ class RugaformResponse implements \JsonSerializable
             $o->$data = $this->getData();
             $o->$success_uri = $this->getSuccessUri() ?? '';
             $o->$redirectionDelay = $this->getRedirectionDelay();
+            $o->$messageDisplay = $this->getMessageDisplay();
             $o->$uniqueid = $this->getUniqueid();
             $o->$result = [
                 'finalMessage' => $this->finalMessage,

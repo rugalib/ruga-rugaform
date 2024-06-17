@@ -168,6 +168,8 @@
         this.formEditMode = false;
         /** Input that last has focus received */
         this.inputWithFocus = null;
+        /** Becomes true, when all submit actions are done and the information (toast/dialog) is gone */
+        this.readyAfterSubmit = true;
 
         // Merge given options into default and store to this.settings
         this.settings = $.extend(true, {}, defaults, options);
@@ -607,7 +609,8 @@
 
 
         /**
-         * Save the form using AJAX.
+         * Save the form using AJAX. This is the actual send method. It is generally not called directly by any
+         * scripts or DOM event.
          *
          * @param event
          * @returns {Promise}
@@ -615,6 +618,7 @@
         submitForm: function (event) {
             this.debugOutput(this._name + '::submitForm()');
 
+            this.readyAfterSubmit = false;
             const form = this.element;
 
             // Create messages if form is not valid
@@ -627,9 +631,10 @@
                     else msg = value.element.name + ': ' + msg;
 
                     alertify.notify(msg, 'error', 10, function () {
-                        console.log('dismissed');
+                        // console.log('dismissed');
                     });
                 }.bind(this));
+                this.readyAfterSubmit = true;
                 return $.Deferred().reject();
             }
 
@@ -684,15 +689,26 @@
                     if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
                         // Feedback from backend is NOT of severity DEBUG or INFORMATIONAL
                         // => failure
-                        alertify.alert('Formular', data.rugaform_result.finalMessage);
+                        alertify.alert('Formular', data.rugaform_result.finalMessage, () => {
+                            this.readyAfterSubmit = true;
+                        });
 
                         this.callback_onSubmitFailure(data, textStatus, jqXHR, null);
                         this.element.trigger('rugaform.submitfailure');
                     } else {
                         // => success
-                        alertify.notify(data.rugaform_result.finalMessage, 'success', 6, function () {
-                            // console.log('dismissed');
-                        });
+                        if (!data.rugaform_message_display || data.rugaform_message_display === 'notifier') {
+                            // Show message in toast
+                            alertify.notify(data.rugaform_result.finalMessage, 'success', this._getRedirectionDelay(data) / 1000, () => {
+                                this.readyAfterSubmit = true;
+                            });
+                        } else if (data.rugaform_message_display === 'alert') {
+                            // Show message in dialog
+                            alertify.alert('Erfolgreich', data.rugaform_result.finalMessage, () => {
+                                this.readyAfterSubmit = true;
+                            });
+                        }
+
                         if (!!data.rugaform_data) this.settings.row = data.rugaform_data;
 
                         this.callback_onSubmitSuccess(data, textStatus, jqXHR, null);
@@ -706,8 +722,14 @@
                     this.debugBtn.addClass('text-danger');
                     this.debugModalBody.html('<div class="alert alert-danger" role="alert">' + textStatus + '</div>');
 
+                    const data = jqXHR.responseJSON;
                     console.log("errorThrown=", errorThrown);
-                    alertify.alert('Formular', 'Die Forumlar-Daten konnten nicht übermittelt werden.');
+                    const finalMessage = (!!data.rugaform_result && typeof data.rugaform_result.finalMessage === 'string')
+                        ? data.rugaform_result.finalMessage
+                        : 'Die Forumlar-Daten konnten nicht übermittelt werden.';
+                    alertify.alert('Fehler!', finalMessage, () => {
+                        this.readyAfterSubmit = true;
+                    });
                     this.callback_onSubmitFailure(null, textStatus, jqXHR, errorThrown);
                     this.callback_onSubmit(null, textStatus, jqXHR, errorThrown);
                 }.bind(this),
@@ -1109,12 +1131,20 @@
         submit: function (event) {
             this.debugOutput(this._name + '::submit(event) | event=', event);
 
-            return this.submitForm(event).then(function (data) {
-                if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if(!this._handleSuccessUri(data)) {
+            return this.submitForm(event).then((data) => {
+                if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
+                    // Set edit mode even if an error occured
+                    this.setFormEditMode(false);
+                    return;
+                }
+                // Everyting ok, handle successuri
+                if (!this._handleSuccessUri(data)) {
                     this.refreshForm();
                 }
-            }.bind(this));
+            }, () => {
+                // Set edit mode even if an error occured
+                this.setFormEditMode();
+            });
         },
 
 
@@ -1127,7 +1157,7 @@
 
             return this.deleteForm(event).then(function (data) {
                 if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-                if(!this._handleSuccessUri(data)) {
+                if (!this._handleSuccessUri(data)) {
                     this.refreshForm();
                 }
             }.bind(this));
@@ -1202,6 +1232,25 @@
             });
         },
 
+
+        _getRedirectionDelay: function (data) {
+            return (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
+                ? data.rugaform_redirection_delay
+                : 0;
+        },
+
+
+        _getSuccessUri: function (data) {
+            return (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
+                ? data.rugaform_successuri.trim()
+                : (
+                    ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
+                        ? data.rugaform_result.rugaform_successuri.trim()
+                        : ''
+                );
+        },
+
+
         /**
          * Handles success uri redirection.
          *
@@ -1216,22 +1265,15 @@
         _handleSuccessUri: function (data) {
             if (this.settings.suppressreload) return false;
 
-            const redirectionDelay = (!!data.rugaform_redirection_delay) && (typeof data.rugaform_redirection_delay === 'number')
-                ? data.rugaform_redirection_delay
-                : 0;
-
-            const successuri = (!!data.rugaform_successuri) && (typeof data.rugaform_successuri === 'string')
-                ? data.rugaform_successuri.trim()
-                : (
-                    ((!!data.rugaform_result) && (typeof data.rugaform_result.rugaform_successuri === 'string'))
-                        ? data.rugaform_result.rugaform_successuri.trim()
-                        : ''
-                );
+            const successuri = this._getSuccessUri(data);
 
             if (successuri !== '') {
-                setTimeout(function() {
-                    location.href = successuri;
-                }, redirectionDelay);
+                let intervalId = setInterval((successuri) => {
+                    if (this.readyAfterSubmit) {
+                        clearInterval(intervalId);
+                        location.href = successuri;
+                    }
+                }, 200, successuri);
                 return true;
             }
             return false;
@@ -1288,7 +1330,7 @@
 
 
     /**
-     * Event handler "submit"
+     * Event handler "submit". This one is called, when the user clicks the submit button or presses enter.
      *
      * @param event
      * @returns {Promise}
@@ -1300,11 +1342,19 @@
         const element = event.currentTarget;
         event.preventDefault();
         event.stopPropagation();
-        return this.submitForm(event).then(data => {
-            if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) return;
-            if(!this._handleSuccessUri(data)) {
+        return this.submitForm(event).then((data) => {
+            if ((data.rugaform_result.finalSeverity !== 'DEBUG') && (data.rugaform_result.finalSeverity !== 'INFORMATIONAL')) {
+                // Set edit mode even if an error occured
+                this.setFormEditMode();
+                return;
+            }
+            // Everyting ok, handle successuri
+            if (!this._handleSuccessUri(data)) {
                 this.refreshForm();
             }
+        }, () => {
+            // Set edit mode even if an error occured
+            this.setFormEditMode();
         });
     }
 
@@ -1362,7 +1412,7 @@
             function () {
                 alertify.success('Ok');
                 return this.deleteForm(event).then(function (data) {
-                    if(!this._handleSuccessUri(data)) {
+                    if (!this._handleSuccessUri(data)) {
                         this.refreshForm();
                     }
                 });
