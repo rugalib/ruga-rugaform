@@ -10,6 +10,7 @@ namespace Ruga\Rugaform\Middleware;
 
 use Laminas\Diactoros\Response;
 use Laminas\Diactoros\Response\JsonResponse;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Ruga\Rugaform\Rugaform;
 
@@ -24,8 +25,8 @@ class RugaformResponse implements \JsonSerializable
     /** @var string|null Unique ID of the row. NULL, if new row. */
     private $uniqueid = null;
     
-    /** @var string|null Executed query/method. */
-    private $query = null;
+    /** @var string Executed query/method. */
+    private string $query = '';
     
     /** @var array Log messages. */
     private array $messages = [];
