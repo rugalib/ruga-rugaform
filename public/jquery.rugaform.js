@@ -29,9 +29,9 @@
     const defaults = {
         url: '',
 
-        /** Also submit disabled inputs. */
+        /** Sets whether disabled inputs should be submitted. */
         submitdisabled: false,
-        /** Marks changed inputs with css class selector.changed. */
+        /** Mark changed inputs with css class selector.changed. */
         trackchanges: true,
         /** Send changes immediately to the backend without waiting for the user to click "save". */
         instasave: false,
@@ -654,7 +654,7 @@
 
             return $.ajax({
                 type: form.attr('method') === undefined ? 'POST' : form.attr('method'),
-                url: form.prop('action'),
+                url: form.attr('action'),
                 data: serializedform,
                 dataType: 'json',
                 context: this,

@@ -40,7 +40,7 @@ class Model implements DatasourcePluginInterface
     
     
     /**
-     * Handle the request from datatables and return the response.
+     * Handle the request from rugaform and return the response.
      *
      * @param RugaformRequest $rugaformRequest
      *
