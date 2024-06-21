@@ -109,9 +109,6 @@ class Rugaform implements ConfigurationInterface
     
     public function renderHtml()
     {
-        $str = '<div id="' . $this->getId('debug') . '" ';
-        $str .= '>';
-        
         $bugicon = file_get_contents(__DIR__ . '/../public/bug-outline.svg');
         $debug = <<<HTML
 <button type="button" class="btn btn-xs btn-default" style="padding: 5px; border: 2px; width: 2.2em" disabled="disabled" data-bs-toggle="modal" data-bs-target="#{$this->getId(
@@ -139,7 +136,9 @@ class Rugaform implements ConfigurationInterface
 </div>
 HTML;
         
-        return $str . ($this->getConfig('debug', true) ? $debug : '');
+        return '<div id="' . $this->getId('debug') . '">'
+            . ($this->getConfig('debug', true) ? $debug : '')
+            . '</div>';
     }
     
     
