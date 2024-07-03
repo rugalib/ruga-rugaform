@@ -136,7 +136,7 @@ class Rugaform implements ConfigurationInterface
 </div>
 HTML;
         
-        return '<div id="' . $this->getId('debug') . '">'
+        return '<div class="rugaform__debug" id="' . $this->getId('debug') . '">'
             . ($this->getConfig('debug', true) ? $debug : '')
             . '</div>';
     }
@@ -198,5 +198,13 @@ JS;
     {
         return '</form>';
     }
+    
+    
+    
+    public function getForm(): FormInterface
+    {
+        return $this->form;
+    }
+    
     
 }

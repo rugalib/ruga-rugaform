@@ -340,8 +340,7 @@
             this.debugOutput(this._name + '::getFormStatus()');
 
             let status = [];
-            $(':input', this.element).each(function (index, element) {
-                const input = $(element);
+            this._eachInput(function (index, input) {
                 const label = this.findLabel(input);
                 input.uniqueId();
 
@@ -423,8 +422,7 @@
             // Store the current form edit mode
             this.formEditMode = mode;
 
-            $(':input', this.element).each(function (index, element) {
-                const input = $(element);
+            this._eachInput(function (index, input) {
                 const initialstatus = this.getInitialStatus(input);
                 let newdisabledstatus = true;
 
@@ -515,8 +513,7 @@
          */
         disableAllInput: function () {
             this.debugOutput(this._name + '::disableAllInput()');
-            $(':input', this.element).each(function (index, element) {
-                const input = $(element);
+            this._eachInput(function (index, input) {
                 this.setInputPropDisabled(input, true);
             }.bind(this));
         },
@@ -533,8 +530,7 @@
             this.element.on('reset.' + this.pluginName, null, this, this._onReset.bind(this));
 
             // Bind change, click and keyup handlers to the inputs
-            $(':input', this.element).each(function (index, element) {
-                const input = $(element);
+            this._eachInput(function (index, input) {
                 input.on('change.' + this.pluginName, null, this, this._onChange.bind(this));
                 input.on('click.' + this.pluginName, null, this, this._onClick.bind(this));
                 input.on('keyup.' + this.pluginName, null, this, this._onKeyup.bind(this));
@@ -655,8 +651,12 @@
             return $.ajax({
                 type: form.attr('method') === undefined ? 'POST' : form.attr('method'),
                 url: form.attr('action'),
-                data: serializedform,
+                data: JSON.stringify(serializedform),
+                contentType: 'application/json',
                 dataType: 'json',
+                beforeSend: (request) => {
+                    request.setRequestHeader('X-Ruga-Component', 'ruga-rugaform');
+                },
                 context: this,
                 success: function (data, textStatus, jqXHR) {
                     // Set debug button and modal
@@ -740,6 +740,7 @@
                     }
 
                     // enable debug button
+                    this.debugBtn.attr('disabled', false);
                     this.debugBtn.prop('disabled', false);
 
                     // this.setFormEditMode(true);
@@ -852,8 +853,7 @@
             /*
             this.setFormEditMode(false);
 
-            $(':input', this.element).each(function (index, element) {
-                const input = $(element);
+            this._eachInput(function (index, input) {
                 const input_name=input.attr('name');
 
                 input.val(this.getRowValue(input_name));
@@ -1037,7 +1037,7 @@
                     elView = el.parent().find('.select2-container').eq(0);
                 }
 
-                isChanged = (initialstatus.value !== undefined) && (el.val() !== initialstatus.value);
+                isChanged = (initialstatus.value !== undefined) && (initialstatus.value !== null) && (el.val() !== initialstatus.value);
             }
 
             if (isChanged) elView.addClass(this.settings.selector.changed);
@@ -1292,6 +1292,23 @@
                 return true;
             }
             return false;
+        },
+
+        /**
+         * Executes a function for each input element within the context of the form element.
+         *
+         * @param {Function} fn - The function to execute for each input element `fn(index, input)`.
+         */
+        _eachInput: function(fn) {
+            $(':input', this.element).each(function (index, element) {
+                const input = $(element);
+
+                // Do not change debug elements
+                let isDbgChild = input.closest('div.rugaform__debug').length > 0;
+                if(isDbgChild) return;
+
+                fn(index, input);
+            });
         },
 
 

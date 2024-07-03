@@ -10,6 +10,7 @@ namespace Ruga\Rugaform\Middleware;
 
 use Fig\Http\Message\RequestMethodInterface;
 use Laminas\Diactoros\Uri;
+use Laminas\Json\Json;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Ruga\Rugaform\Rugaform;
